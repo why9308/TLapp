@@ -28,32 +28,39 @@
       <router-link to="/merchant">商家</router-link>
     </div>
     <router-view></router-view>
-    <div id="box_bottom">
+    <div @click="showboard=!showboard" id="box_bottom">
       <div class="radious">
         <div class="radious1">
-          <van-icon name="shopping-cart-o" color="#fff" size="30px" />
+          <img :src="img" alt="">
         </div>
       </div>
       <div class="right">
         <div class="right_box">
           ￥
-          <span>0</span>
-        </div>
-        <p class="right_p">
+          <span class="span1">{{allprice}}</span>
+           <p class="right_p">
           另需配送费￥
           <span>{{merchant.deliveryPrice}}</span>
         </p>
-        <van-button color="#2B343B">
+        </div>
+        <van-button class="spancolor" color="#FFC030">
           ￥
-          <span>{{merchant.minPrice}}</span>起送
+          <span >{{merchant.minPrice}}</span>起送
         </van-button>
       </div>
     </div>
+    <transition id="shopcar" name="slide-fade">
+      <div v-show="showboard" class="shop-board">
+        <shopcar></shopcar>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
-import { API_seller } from "@/API/apis";
+import { API_seller, IP } from "@/API/apis";
+import shopcar from "./Shopcar";
+
 export default {
   data() {
     return {
@@ -62,6 +69,7 @@ export default {
       imgUrl2: require("../assets/images/decrease_1@2x.png"),
       //   导航
       active: 0,
+      showboard: false,
 
       //   弹出层
       show: false,
@@ -71,18 +79,57 @@ export default {
   methods: {
     showPopup() {
       this.show = true;
+    },
+    // activebtn(e){
+    //  console.log(e.target);
+    shopbtn() {
+      this.showboard = true;
     }
+    // }
   },
   created() {
     API_seller().then(res => {
+      res.data.data.avatar = res.data.data.avatar.replace(
+        "http://127.0.0.1:5000",
+        IP
+      );
+      // console.log( res.data.data.avatar);
       this.merchant = res.data.data;
-      console.log(this.merchant);
     });
+  },
+  components: {
+    shopcar
+  },
+  computed:{
+      allprice(){
+          let totalprice=0
+          for(let obj of this.$store.getters.shoplist){
+               totalprice+=obj.num*obj.price
+            
+          } 
+          return  totalprice.toFixed(2)
+      },
+      img(){
+        if(this.$store.getters.shoplist.length>0){
+            return require("../assets/images/shopcar.png")
+        }
+         return require("../assets/images/shopcar1.png")
+      }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+.slide-fade-enter-active {
+  transition: all 0.4s ease;
+}
+.slide-fade-leave-active {
+  transition: all 0.4s ease;
+}
+.slide-fade-enter, .slide-fade-leave-to {
+  transform: translateY(300px);
+  opacity: 0;
+}
 #box {
   display: flex;
   flex-direction: column;
@@ -147,7 +194,7 @@ export default {
     display: flex;
     justify-content: space-around;
     line-height: 40px;
-    border-bottom: 1px solid #E4E4E4;
+    border-bottom: 1px solid #e4e4e4;
     a {
       color: #5e666c;
     }
@@ -156,9 +203,11 @@ export default {
     position: fixed;
     bottom: 0px;
     width: 100%;
+    height: 60px;
     background: #141c27;
     display: flex;
     justify-content: flex-end;
+    z-index: 100;
     .radious {
       display: flex;
       justify-content: center;
@@ -169,7 +218,7 @@ export default {
       background: #141c27;
       position: absolute;
       top: -10px;
-      left: 20px;
+      left: 12px;
       .radious1 {
         justify-content: center;
         align-items: center;
@@ -177,28 +226,44 @@ export default {
         height: 40px;
         width: 40px;
         border-radius: 50%;
-        background: #2b343d;
+        // background: #2b343d;
       }
     }
-    .right {
-      display: flex;
+     .right {
+       display: flex; 
       align-items: center;
-      justify-content: space-around;
       .right_box {
-        color: #929397;
+          display: flex;
+         align-items: center;
+        justify-content: space-around;
+        color: #fff;
         font-size: 25px;
-        margin-right: 25px;
-        padding-right: 15px;
-        border-right: 1px solid #929397;
+        
+        .span1{
+          margin-right: 10px;
+          border-right: 1px solid #929397;
+          padding-right: 5px;
+        }
       }
       .right_p {
         color: #929397;
-        margin-right: 20px;
+        font-size: 12px;
+        margin-right: 5px;
+      }
+      .spancolor{
+        color:#333333;
       }
       button {
         height: 100%;
+        flex: 1 1 auto;
       }
     }
+  }
+  #shopcar {
+    bottom: 60px;
+    position: fixed;
+    width: 100%;
+    background-color: beige;
   }
 }
 </style>

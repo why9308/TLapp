@@ -2,17 +2,22 @@
   <div class="merchant">
     <div class="merchant_header">
       <div class="merchant_header_box">
-        <h3>{{merchant.name}}</h3>
-        <van-rate
-          class="star"
-          v-model="merchant.score"
-          allow-half
-          void-icon="star"
-          void-color="#eee"
-        />
-        <span>(661)</span>
-        <span>月售661单</span>
-        <van-icon name="like-o" color="red" background="red" />
+        <div>
+          <h3>{{merchant.name}}</h3>
+          <van-rate
+            class="star"
+            v-model="merchant.score"
+            allow-half
+            void-icon="star"
+            void-color="#eee"
+          />
+          <span>(661)</span>
+          <span>月售661单</span>
+        </div>
+        <div class="collect">
+          <van-icon name="like" color="red" size="30px" />
+          <p>已收藏</p>
+        </div>
       </div>
       <div class="merchant_header_bottom">
         <van-row type="flex" justify="space-around">
@@ -55,18 +60,27 @@
     </div>
     <div class="merchant_liveAction">
       <h3>商家实景</h3>
-      <van-row type="flex">
-        <van-col v-for="item1 in merchant.pics" :key="item1.index" span="6">
-          <img :src="item1" alt="">
+      <van-row>
+        <van-col v-for="item1 in merchant.pics" :key="item1.index">
+          <img :src="item1" alt />
         </van-col>
       </van-row>
     </div>
-    <div></div>
+    <div class="merchant_information">
+      <h3>商家信息</h3>
+      <ul>
+        <li>该商家支持开发票，请在下单时填好发票抬头</li>
+        <li>品类：其他菜系，包子粥店</li>
+        <li>地址：北京市昌平区回龙观西大街龙观置业大厦底商B座102单元1340</li>
+        <li>营业时间:{{merchant.date}}</li>
+      </ul>
+    </div>
+    <!-- <div @click="btn">{{name}}</div> -->
   </div>
 </template>
 
 <script>
-import { API_seller } from "@/API/apis";
+import { API_seller, IP } from "@/API/apis";
 export default {
   data() {
     return {
@@ -75,26 +89,37 @@ export default {
   },
   created() {
     API_seller().then(res => {
+      var arr = [];
+      res.data.data.pics.forEach(i => {
+        arr.push(i.replace("http://127.0.0.1:5000", IP));
+      });
+      res.data.data.pics = arr;
       this.merchant = res.data.data;
-      console.log(this.merchant);
-      console.log(this.merchant.pics);
-      
+      this.merchant.date =
+        this.merchant.date[0].slice(10) + "-" + this.merchant.date[1].slice(10);
     });
-  }
+  },
+ 
 };
 </script>
 
 <style lang="scss" scoped>
 .merchant {
+  display: flex;
+  flex-direction: column;
   background: #f4f5f7;
   overflow-y: scroll;
   height: 100%;
+  flex: 1;
+  padding-bottom: 60px;
   .merchant_header {
     background: #ffffff;
     padding: 20px;
     margin-bottom: 20px;
     .merchant_header_box {
       border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      justify-content: space-between;
       h3 {
         margin: 5px 0px;
         color: #09131d;
@@ -104,6 +129,16 @@ export default {
       }
       span {
         margin-right: 15px;
+      }
+      .collect {
+        display: flex;
+        flex-direction: column;
+        justify-content: start;
+        align-items: center;
+        padding-top: 5px;
+        p {
+          margin: 0px;
+        }
       }
     }
     .merchant_header_bottom {
@@ -147,13 +182,33 @@ export default {
       }
     }
   }
-  .merchant_liveAction{
-    height: 100%;
-     padding: 20px;
+  .merchant_liveAction {
+    padding: 20px;
     background: #fff;
     margin-bottom: 20px;
-    h3{
-       margin: 0px;
+    h3 {
+      margin: 0px;
+      margin-bottom: 10px;
+    }
+    img {
+      width: 110px;
+      height: 100px;
+      padding: 5px;
+    }
+  }
+  .merchant_information {
+    padding: 20px;
+    background: #fff;
+    margin-bottom: 20px;
+    h3 {
+      border-bottom: 1px solid #e8e8e8;
+      padding-bottom: 15px;
+      margin: 0px;
+    }
+    li {
+      line-height: 40px;
+      border-bottom: 1px solid #e8e8e8;
+      color: #080b14;
     }
   }
 }
